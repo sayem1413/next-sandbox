@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
-# Shared hosting deploy + start script (1 CPU, 2 GB RAM).
-# Run from the application root after uploading files.
+# Start the app on shared hosting (after upload).
+# Build is NOT run here — upload a pre-built package instead.
 #
 # Usage:
 #   chmod +x startup.sh
@@ -16,11 +16,11 @@ export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export UV_THREADPOOL_SIZE="${UV_THREADPOOL_SIZE:-2}"
 export NEXT_TELEMETRY_DISABLED=1
 
-echo "Installing dependencies..."
-npm ci --omit=dev 2>/dev/null || npm install --omit=dev
-
-echo "Building application..."
-npm run build
+if [[ ! -f ".next/standalone/server.js" ]]; then
+  echo "Error: .next/standalone/server.js not found."
+  echo "Upload a pre-built package created with: npm run pack:hosting"
+  exit 1
+fi
 
 echo "Starting application..."
 exec node app.js

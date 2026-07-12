@@ -206,6 +206,20 @@ src/
 
 ---
 
+## Shared hosting deployment
+
+This project is ready for **shared hosting** (1 CPU, 2 GB RAM). Build locally and upload a pre-built package — no server-side build required.
+
+```bash
+npm run pack:hosting
+```
+
+Upload `nextjs-todo-hosting.zip` to your host, set **Application startup file** to `app.js`, and restart.
+
+See **[DEPLOY.md](./DEPLOY.md)** for the full cPanel/Plesk setup guide.
+
+---
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).

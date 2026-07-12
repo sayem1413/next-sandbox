@@ -2,9 +2,14 @@
   "name": "nextjs-todo-demo",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.18.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:hosting": "next build && node scripts/prepare-hosting.js",
+    "pack:hosting": "bash scripts/pack-hosting.sh",
     "start": "next start",
     "start:hosting": "node app.js",
     "lint": "next lint"

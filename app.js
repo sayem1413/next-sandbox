@@ -1,29 +1,23 @@
 #!/usr/bin/env node
 /**
- * Application startup file for shared hosting.
+ * Shared hosting startup file (1 CPU, 2 GB RAM).
  *
- * Target environment: 1 CPU core, 2 GB RAM
- * Compatible with: cPanel Node.js Selector, Plesk, CloudLinux, Passenger
+ * Hosting panel setting: Application startup file = app.js
  *
- * Setup (run once before first start):
- *   npm install
- *   npm run build
- *
- * In your hosting panel, set "Application startup file" to: app.js
+ * Requires a pre-built standalone bundle at .next/standalone/
+ * Create it locally with: npm run build:hosting
+ * Or upload the zip from: npm run pack:hosting
  */
 
 "use strict";
 
-const { createServer } = require("http");
-const { parse } = require("url");
+const fs = require("fs");
 const path = require("path");
-const next = require("next");
 
 // --- Resource limits (1 CPU, 2 GB RAM) ------------------------------------
 
 process.env.NODE_ENV = "production";
 
-// Reserve ~512 MB for the OS, web server, and other processes.
 if (!process.env.NODE_OPTIONS?.includes("max-old-space-size")) {
   process.env.NODE_OPTIONS = [
     process.env.NODE_OPTIONS,
@@ -33,46 +27,26 @@ if (!process.env.NODE_OPTIONS?.includes("max-old-space-size")) {
     .join(" ");
 }
 
-// Single-core host: keep libuv thread pool small.
 process.env.UV_THREADPOOL_SIZE = process.env.UV_THREADPOOL_SIZE || "2";
-
-// Disable telemetry to reduce background work.
 process.env.NEXT_TELEMETRY_DISABLED = "1";
+process.env.HOSTNAME = process.env.HOST || "0.0.0.0";
 
-// --- Server -----------------------------------------------------------------
+// --- Standalone server ------------------------------------------------------
 
-const port = parseInt(process.env.PORT, 10) || 3000;
-const hostname = process.env.HOST || "0.0.0.0";
-const appDir = __dirname;
+const appRoot = __dirname;
+const standaloneDir = path.join(appRoot, ".next", "standalone");
+const standaloneServer = path.join(standaloneDir, "server.js");
 
-const app = next({ dev: false, dir: appDir });
-const handle = app.getRequestHandler();
+if (!fs.existsSync(standaloneServer)) {
+  console.error("Missing production bundle: .next/standalone/server.js");
+  console.error("Build locally, then upload the hosting package:");
+  console.error("  npm run pack:hosting");
+  process.exit(1);
+}
 
-app
-  .prepare()
-  .then(() => {
-    const server = createServer(async (req, res) => {
-      try {
-        const parsedUrl = parse(req.url, true);
-        await handle(req, res, parsedUrl);
-      } catch (error) {
-        console.error("Request handler error:", error);
-        res.statusCode = 500;
-        res.end("Internal Server Error");
-      }
-    });
+process.chdir(standaloneDir);
 
-    server.once("error", (error) => {
-      console.error("Server failed to start:", error);
-      process.exit(1);
-    });
+console.log(`Starting Next.js standalone server from ${standaloneDir}`);
+console.log(`Listening on port ${process.env.PORT || 3000}`);
 
-    server.listen(port, hostname, () => {
-      console.log(`Next.js ready on http://${hostname}:${port}`);
-      console.log(`Working directory: ${path.resolve(appDir)}`);
-    });
-  })
-  .catch((error) => {
-    console.error("Failed to prepare Next.js application:", error);
-    process.exit(1);
-  });
+require("./server.js");

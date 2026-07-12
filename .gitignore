@@ -30,6 +30,11 @@ yarn-error.log*
 
 # env files
 .env*
+!.env.example
+
+# shared hosting upload artifacts
+/hosting-upload/
+nextjs-todo-hosting.zip
 
 # typescript
 *.tsbuildinfo
