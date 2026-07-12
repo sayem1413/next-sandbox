@@ -1,0 +1,23 @@
+# Apache reverse-proxy example for shared hosts that route traffic through Apache.
+# Rename to .htaccess only if your host requires manual proxy rules.
+# cPanel Node.js Selector usually manages this automatically.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Do not proxy existing files or directories.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Proxy all other requests to the Node.js app.
+  # Replace 3000 with your app's PORT if different.
+  RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+</IfModule>
+
+# Optional: increase proxy timeout for slow cold starts on shared hosting.
+<IfModule mod_proxy.c>
+  ProxyPreserveHost On
+  ProxyTimeout 300
+</IfModule>
