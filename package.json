@@ -11,7 +11,7 @@
     "build:hosting": "next build && node scripts/prepare-hosting.js",
     "pack:hosting": "bash scripts/pack-hosting.sh",
     "start": "next start",
-    "start:hosting": "node app.js",
+    "start:hosting": "node server.js",
     "lint": "next lint"
   },
   "dependencies": {

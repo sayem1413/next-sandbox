@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+/* import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // Smaller, self-contained production bundle for shared hosting (2 GB RAM).
@@ -12,6 +12,28 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+};
+
+export default nextConfig; */
+
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  output: "standalone",
+
+  poweredByHeader: false,
+
+  compress: true,
+
+  reactStrictMode: true,
+
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   typescript: {
     ignoreBuildErrors: false,
   },
