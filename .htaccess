@@ -1,23 +1,46 @@
-# Apache reverse-proxy example for shared hosts that route traffic through Apache.
-# Rename to .htaccess only if your host requires manual proxy rules.
-# cPanel Node.js Selector usually manages this automatically.
+# ------------------------------------------------------------------
+# Next.js (Passenger / cPanel Node.js App)
+# ------------------------------------------------------------------
+
+Options -MultiViews
 
 <IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
+    RewriteEngine On
+    RewriteBase /
 
-  # Do not proxy existing files or directories.
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
+    # Serve existing files/directories directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
 
-  # Proxy all other requests to the Node.js app.
-  # Replace 3000 with your app's PORT if different.
-  RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+    # Let Passenger / Node.js App handle everything else
+    RewriteRule ^ index.html [L]
 </IfModule>
 
-# Optional: increase proxy timeout for slow cold starts on shared hosting.
-<IfModule mod_proxy.c>
-  ProxyPreserveHost On
-  ProxyTimeout 300
+# Security Headers
+<IfModule mod_headers.c>
+    Header always unset X-Powered-By
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# Browser Cache
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+
+    ExpiresByType font/woff2 "access plus 1 year"
 </IfModule>
